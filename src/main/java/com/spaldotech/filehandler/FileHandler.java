@@ -1,9 +1,6 @@
 package com.spaldotech.filehandler;
 
-import java.io.File;
-import java.io.IOException;
-import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
+
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -12,6 +9,15 @@ import javax.swing.JOptionPane;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.commons.io.FileUtils;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 
 @Mod(modid = FileHandler.MODID, name = FileHandler.NAME, version = FileHandler.VERSION)
@@ -24,7 +30,7 @@ public class FileHandler {
     
     //static Logger log = LogManager.getLogger(FileHandler.class);
     static Logger log = LogManager.getLogger("Spaldotech");
-    		
+    final static int BUFFER = 2048;	
 	static File directory = new File ("config/fancymenu");
 	static String filePresenceMessage = "A new modpack update has been detected. To complete installation, the config files must be refreshed and the modpack restarted.";
 	static String errorCleaning = "An error occurred while deleting the files in the"  + directory +  "directory. Please consult the log files.";
@@ -47,6 +53,79 @@ public class FileHandler {
 		
  
     }
+    
+    private static void unZipFile(String srcFilePath, String destFilePath) throws IOException
+    {
+        //Step 1 : Create destination path from the given destFilePath
+         
+        Path destination = Paths.get(destFilePath).normalize();
+         
+        //Step 2 : Create a directory destination if it doesn't exist.
+         
+        if( ! Files.exists(destination))
+        {
+            Files.createDirectory(destination);
+        }
+         
+        //Step 3 : Create fis and zis from the given srcFilePath
+         
+        FileInputStream fis = new FileInputStream(srcFilePath);
+        ZipInputStream zis = new ZipInputStream(fis);
+         
+        ZipEntry zipEntry = zis.getNextEntry();
+         
+        //For every zipEntry
+         
+        while (zipEntry != null)
+        {
+            //Step 4 : Convert zipEntry into path and resolve it against destination.
+             
+            Path path = destination.resolve(zipEntry.getName()).normalize();
+             
+            //Step 5 : If path doesn't start with destination, print "Invalid Zip Entry".
+             
+            if ( ! path.startsWith(destination)) 
+            {
+                System.out.println("Invalid Zip Entry");
+            }
+             
+            //Step 6 : If zipEntry is a directory, create directory with path.
+             
+            if (zipEntry.isDirectory()) 
+            {   
+                Files.createDirectory(path);
+            }
+            else
+            {
+                //Step 7 : If zipEntry is not a directory, create bos with path,
+                 
+                BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(path));
+                 
+                byte[] bytes = new byte[1024];
+                 
+                //Read data byte by byte from zis into bytes and write same bytes into bos
+                 
+                while (zis.read(bytes) >= 0)
+                {
+                    bos.write(bytes, 0, bytes.length);
+                }
+                 
+                //Close bos
+             
+                bos.close();
+            }
+             
+            zis.closeEntry();
+             
+            zipEntry = zis.getNextEntry();
+        }
+         
+        //Step 8 : Close the resources
+         
+        zis.close();
+        fis.close();
+    }
+    
     
     public static void cleanDirectory() {
     	try {
@@ -74,19 +153,13 @@ public class FileHandler {
 		
     }
     
-    public static void extractZip() {
+    public static void extractZip() throws IOException {
     	String source = "cache/fancymenu-1.12.2-1.1.2.zip";
     	String target = "cache/extracted_files/";
     	
-    	try {
-    		ZipFile zipFile = new ZipFile(source);
-    		log.info("Extracting ZIP. This may take a while.");
-    		zipFile.extractAll(target);
-    		
-    	} catch (ZipException e) {
-    		log.error("Failed to extract zip");
-    		e.getStackTrace();	
-    	}
+    	unZipFile(source, target);
+    	
+
     }
   
     
@@ -131,7 +204,7 @@ public class FileHandler {
     }
     
     @EventHandler
-    public void init(FMLInitializationEvent event)
+    public void init(FMLInitializationEvent event) throws IOException
     {    	
     	log.info("Punch it, Chewie.");
     	checkFilePresence();
