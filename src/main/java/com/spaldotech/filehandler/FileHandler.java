@@ -2,29 +2,16 @@ package com.spaldotech.filehandler;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.FileHeader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import javax.swing.JOptionPane;
 import org.apache.logging.log4j.Logger;
-
-import com.google.common.io.Files;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-
-
-
-
 
 
 @Mod(modid = FileHandler.MODID, name = FileHandler.NAME, version = FileHandler.VERSION)
@@ -151,21 +138,26 @@ public class FileHandler {
     	
     	if (filePresenceStatusInt == 1) {
     		userConfirmMessage();
+    		
+    		if (choice == 0) {
+        		cleanDirectory();
+    			extractZip();
+    			moveConfigFolder();
+    			deleteExtractedFiles();
+    			deleteTempFile();
+    			JOptionPane.showMessageDialog(null, "The config files have been refreshed and the modpack will now close. Please restart it from the Technic Launcher.");
+    			log.info("Preparing to stop modpack");
+    			System.exit(0);
+        	}else {
+        		log.debug("Not progressing");
+        	}
+    	} else {
+    		log.debug("File does not exist - continuing");
     	}
     	
-    	if (choice == 0) {
-    		cleanDirectory();
-			extractZip();
-			moveConfigFolder();
-			deleteExtractedFiles();
-			deleteTempFile();
-			JOptionPane.showMessageDialog(null, "The config files have been refreshed and the modpack will now close. Please restart it from the Technic Launcher.");
-			log.info("Preparing to stop modpack");
-			System.exit(0);
-    	}else {
-    		log.debug("Not progressing");
-    	}
+    	
     }
+    
     
 }
 

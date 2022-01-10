@@ -60,6 +60,10 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
+	
+	// https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j
+    implementation 'net.lingala.zip4j:zip4j:2.9.1'
+
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
