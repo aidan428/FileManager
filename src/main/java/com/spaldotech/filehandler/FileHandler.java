@@ -1,6 +1,7 @@
 package com.spaldotech.filehandler;
 
 
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -220,7 +221,7 @@ public class FileHandler {
     			deleteTempFile();
     			JOptionPane.showMessageDialog(null, "The config files have been refreshed and the modpack will now close. Please restart it from the Technic Launcher.");
     			log.info("Preparing to stop modpack");
-    			System.exit(0);
+    			FMLCommonHandler.instance().exitJava(BUFFER, false);
         	}else {
         		log.debug("Not progressing");
         	}
