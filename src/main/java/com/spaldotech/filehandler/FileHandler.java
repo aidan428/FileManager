@@ -1,6 +1,8 @@
 package com.spaldotech.filehandler;
 
 
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -55,7 +57,7 @@ public class FileHandler {
  
     }
     
-    private static void unZipFile(String srcFilePath, String destFilePath) throws IOException
+    /* private static void unZipFile(String srcFilePath, String destFilePath) throws IOException
     {
         //Step 1 : Create destination path from the given destFilePath
          
@@ -127,6 +129,23 @@ public class FileHandler {
         fis.close();
     }
     
+   */ 
+    
+    public static void unZip() {
+    	String source = "cache/fancymenu-1.12.2-1.1.2.zip";
+    	String target = "cache/extracted_files/";
+    	
+    	
+    	ZipFile zipFile = new ZipFile(source);
+    	try {
+    		zipFile.extractAll(target);
+    	} catch (ZipException e ) {
+    		e.printStackTrace();
+    		
+    	}
+
+    }
+    
     
     public static void cleanDirectory() {
     	try {
@@ -154,14 +173,7 @@ public class FileHandler {
 		
     }
     
-    public static void extractZip() throws IOException {
-    	String source = "cache/fancymenu-1.12.2-1.1.2.zip";
-    	String target = "cache/extracted_files/";
-    	
-    	unZipFile(source, target);
-    	
 
-    }
   
     
     public static void moveConfigFolder() {
@@ -215,7 +227,7 @@ public class FileHandler {
     		
     		if (choice == 0) {
         		cleanDirectory();
-    			extractZip();
+    			unZip();
     			moveConfigFolder();
     			deleteExtractedFiles();
     			deleteTempFile();
